@@ -1,0 +1,480 @@
+/* ====== Colores y medidas (paleta tipo consola de 8 bits) ====== */
+:root {
+  --color-bg: #140c2c;
+  --color-panel: #2a1a5e;
+  --color-yellow: #fcbc3c;
+  --color-pink: #e40058;
+  --color-cyan: #3cbcfc;
+  --color-green: #00b800;
+  --color-red: #f83800;
+  --color-white: #fcfcfc;
+  --color-black: #000000;
+  --color-gray: #7c7c7c;
+  --pixel: 4px;
+  --font-pixel: 'Press Start 2P', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Asegura que "hidden" siempre oculte, aunque otra regla diga display: flex */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-pixel);
+  line-height: 1.6;
+  color: var(--color-white);
+  background: var(--color-bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Líneas de tele antigua encima de todo */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.2) 2px 4px);
+}
+
+/* Los canvas son chicos y se agrandan sin suavizar: así se ven los píxeles */
+canvas {
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+/* ====== Botones con borde pixelado ====== */
+.btn {
+  margin: var(--pixel);
+  padding: 14px 18px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--color-black);
+  background: var(--color-yellow);
+  border: none;
+  cursor: pointer;
+  box-shadow:
+    inset calc(var(--pixel) * -1) calc(var(--pixel) * -1) 0 0 rgba(0, 0, 0, 0.35),
+    inset var(--pixel) var(--pixel) 0 0 rgba(255, 255, 255, 0.4),
+    0 calc(var(--pixel) * -1) 0 0 var(--color-black),
+    0 var(--pixel) 0 0 var(--color-black),
+    calc(var(--pixel) * -1) 0 0 0 var(--color-black),
+    var(--pixel) 0 0 0 var(--color-black);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(var(--pixel));
+}
+
+.btn:disabled {
+  color: var(--color-black);
+  background: var(--color-gray);
+  cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: var(--pixel) dashed var(--color-cyan);
+  outline-offset: 6px;
+}
+
+.btn-spin {
+  width: calc(100% - var(--pixel) * 2);
+  padding: 22px 12px;
+  font-size: clamp(16px, 5.5vw, 24px);
+  color: var(--color-white);
+  background: var(--color-pink);
+  text-shadow: 3px 3px 0 var(--color-black);
+  animation: pulse 1s steps(2) infinite;
+}
+
+.btn-spin:disabled {
+  animation: none;
+}
+
+.btn-icon {
+  padding: 8px 10px;
+  font-size: 18px;
+  background: var(--color-cyan);
+}
+
+.btn-add {
+  padding: 10px 16px;
+  font-size: 16px;
+  background: var(--color-green);
+}
+
+.btn-danger {
+  margin-top: 20px;
+  font-size: 10px;
+  color: var(--color-white);
+  background: var(--color-red);
+}
+
+/* ====== Pantalla de inicio ====== */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 16px;
+  text-align: center;
+  background: var(--color-bg);
+  cursor: pointer;
+}
+
+.intro:focus {
+  outline: none;
+}
+
+.intro-title {
+  font-size: clamp(26px, 9vw, 60px);
+  font-weight: normal;
+  color: var(--color-yellow);
+  text-shadow: 4px 4px 0 var(--color-pink), 8px 8px 0 var(--color-black);
+}
+
+.intro-title span {
+  display: inline-block;
+  opacity: 0;
+}
+
+.intro.playing .intro-title span {
+  animation: letter-drop 0.4s steps(4) forwards;
+  animation-delay: calc(var(--i) * 0.15s);
+}
+
+.sponge-stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+}
+
+.intro-sponge {
+  width: 128px;
+  height: 128px;
+  animation: sponge-idle 1s steps(2) infinite;
+}
+
+.intro.playing .intro-sponge {
+  animation: sponge-bounce 1s steps(6) infinite;
+}
+
+.bubble {
+  position: absolute;
+  bottom: 40px;
+  left: var(--x);
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--color-white);
+  opacity: 0;
+}
+
+.intro.playing .bubble {
+  animation: bubble-rise 1.6s steps(8) infinite;
+  animation-delay: var(--delay);
+}
+
+.intro-tap {
+  font-size: 14px;
+  color: var(--color-cyan);
+  animation: blink 1s step-end infinite;
+}
+
+.intro.playing .intro-tap {
+  visibility: hidden;
+}
+
+.intro-credits {
+  font-size: 8px;
+  color: var(--color-gray);
+}
+
+.intro.leaving {
+  animation: fade-out 0.4s steps(4) forwards;
+}
+
+/* ====== Juego ====== */
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 16px 40px;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  font-size: clamp(13px, 4.2vw, 20px);
+  color: var(--color-yellow);
+  text-shadow: 3px 3px 0 var(--color-pink);
+}
+
+.wheel-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.wheel {
+  width: min(100%, 384px);
+  aspect-ratio: 1;
+}
+
+.panel {
+  padding: 18px 14px;
+  background: var(--color-panel);
+  box-shadow:
+    0 calc(var(--pixel) * -1) 0 0 var(--color-white),
+    0 var(--pixel) 0 0 var(--color-white),
+    calc(var(--pixel) * -1) 0 0 0 var(--color-white),
+    var(--pixel) 0 0 0 var(--color-white);
+}
+
+.panel h2 {
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--color-yellow);
+}
+
+.panel h3 {
+  margin: 20px 0 10px;
+  font-size: 11px;
+  color: var(--color-cyan);
+}
+
+.add-form {
+  display: flex;
+  gap: 10px;
+}
+
+.name-input {
+  flex: 1;
+  min-width: 0;
+  margin: var(--pixel);
+  padding: 10px;
+  font-family: inherit;
+  font-size: 16px; /* 16px o más evita que el iPhone haga zoom al escribir */
+  text-transform: uppercase;
+  color: var(--color-black);
+  background: var(--color-white);
+  border: var(--pixel) solid var(--color-black);
+}
+
+.name-input:focus {
+  outline: var(--pixel) solid var(--color-cyan);
+}
+
+.form-error {
+  min-height: 1.6em;
+  margin-top: 8px;
+  font-size: 9px;
+  color: var(--color-red);
+}
+
+.participant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+}
+
+.participant {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--color-black);
+  background: var(--color-cyan);
+  border: 3px solid var(--color-black);
+}
+
+.remove-btn {
+  width: 22px;
+  height: 22px;
+  font-family: inherit;
+  font-size: 9px;
+  color: var(--color-white);
+  background: var(--color-red);
+  border: 2px solid var(--color-black);
+  cursor: pointer;
+}
+
+.remove-btn:disabled {
+  background: var(--color-gray);
+  cursor: not-allowed;
+}
+
+.row-list {
+  list-style: none;
+}
+
+.row-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  border-bottom: 2px dashed rgba(252, 252, 252, 0.25);
+}
+
+.row-list li.empty {
+  justify-content: center;
+  color: var(--color-gray);
+  border-bottom: none;
+}
+
+#scoreboard li:first-child:not(.empty) {
+  color: var(--color-yellow);
+}
+
+/* Mientras gira no se puede tocar la lista ni el historial */
+.app.is-spinning .panel {
+  opacity: 0.6;
+}
+
+/* ====== Screamer ====== */
+.screamer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--color-black);
+  /* 0.4s por destello = menos de 3 destellos por segundo (más seguro para la vista) */
+  animation: screamer-flash 0.4s step-end infinite, shake 0.15s steps(2) infinite;
+}
+
+.screamer-face {
+  width: min(95vw, 95vh);
+  height: min(95vw, 95vh);
+  animation: screamer-zoom 0.25s steps(3) forwards;
+}
+
+/* ====== Pantalla del perdedor ====== */
+.result {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px 16px;
+  text-align: center;
+  background: repeating-linear-gradient(45deg, var(--color-pink) 0 24px, #b8004a 24px 48px);
+  animation: result-in 0.3s steps(3);
+}
+
+.result-label {
+  font-size: 14px;
+  color: var(--color-white);
+  text-shadow: 3px 3px 0 var(--color-black);
+}
+
+.result-name {
+  max-width: 100%;
+  font-size: clamp(28px, 11vw, 64px);
+  text-transform: uppercase;
+  word-break: break-word;
+  color: var(--color-yellow);
+  text-shadow: 4px 4px 0 var(--color-black), -2px -2px 0 var(--color-black);
+  animation: shake 0.5s steps(4) infinite;
+}
+
+.result-taunt {
+  max-width: 360px;
+  font-size: 11px;
+  line-height: 2;
+  color: var(--color-white);
+  text-shadow: 2px 2px 0 var(--color-black);
+}
+
+/* ====== Animaciones (con steps() para que se muevan "a saltos", como en 8 bits) ====== */
+@keyframes letter-drop {
+  from { opacity: 1; transform: translateY(-80px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sponge-idle {
+  50% { transform: scale(1.05, 0.95); }
+}
+
+@keyframes sponge-bounce {
+  0%, 100% { transform: translateY(0) scale(1.15, 0.85); }
+  50% { transform: translateY(-60px) scale(0.95, 1.05); }
+}
+
+@keyframes bubble-rise {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-150px); }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes pulse {
+  50% { transform: scale(1.04); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-6px, 4px); }
+  50% { transform: translate(5px, -4px); }
+  75% { transform: translate(-4px, -5px); }
+}
+
+@keyframes screamer-flash {
+  50% { background: var(--color-red); }
+}
+
+@keyframes screamer-zoom {
+  from { transform: scale(0.2); }
+  to { transform: scale(1.1); }
+}
+
+@keyframes result-in {
+  from { transform: scale(0.3); }
+  to { transform: scale(1); }
+}
+
+/* Si la persona pidió menos movimiento en su sistema: sin destellos ni temblores */
+@media (prefers-reduced-motion: reduce) {
+  .screamer,
+  .result-name,
+  .btn-spin {
+    animation: none;
+  }
+}
