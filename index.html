@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¿Quién lava la loza? | Lava-Inc</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <!-- Pantalla de inicio -->
+  <section id="intro" class="intro" role="button" tabindex="0" aria-label="Toca para empezar">
+    <h1 class="intro-title" aria-label="LAVA-INC">
+      <span style="--i: 0">L</span><span style="--i: 1">A</span><span style="--i: 2">V</span><span style="--i: 3">A</span><span style="--i: 4">-</span><span style="--i: 5">I</span><span style="--i: 6">N</span><span style="--i: 7">C</span>
+    </h1>
+    <div class="sponge-stage">
+      <span class="bubble" style="--x: 10%; --delay: 0s"></span>
+      <span class="bubble" style="--x: 80%; --delay: 0.4s"></span>
+      <span class="bubble" style="--x: 25%; --delay: 0.8s"></span>
+      <span class="bubble" style="--x: 65%; --delay: 1.2s"></span>
+      <canvas id="intro-sponge" class="intro-sponge"></canvas>
+    </div>
+    <p class="intro-tap">TOCA PARA EMPEZAR</p>
+    <p class="intro-credits">© 2026 LAVA-INC · INSERT COIN</p>
+  </section>
+
+  <!-- Juego -->
+  <main id="app" class="app" hidden>
+    <header class="top-bar">
+      <h1 class="title">¿QUIÉN LAVA LA LOZA?</h1>
+      <button id="mute-btn" class="btn btn-icon" aria-label="Silenciar" aria-pressed="false">🔊</button>
+    </header>
+
+    <section class="wheel-section">
+      <canvas id="wheel" class="wheel" width="288" height="288" role="img" aria-label="Ruleta con los participantes"></canvas>
+      <button id="spin-btn" class="btn btn-spin">¿QUIÉN LAVA?</button>
+    </section>
+
+    <section class="panel">
+      <h2>JUGADORES</h2>
+      <form id="add-form" class="add-form">
+        <input id="name-input" class="name-input" maxlength="12" placeholder="NOMBRE" autocomplete="off" aria-label="Nombre del jugador">
+        <button class="btn btn-add" type="submit" aria-label="Agregar jugador">+</button>
+      </form>
+      <p id="form-error" class="form-error" role="alert"></p>
+      <ul id="participant-list" class="participant-list"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>SALÓN DE LA VERGÜENZA</h2>
+      <ol id="scoreboard" class="row-list"></ol>
+      <h3>ÚLTIMOS SORTEOS</h3>
+      <ul id="history-list" class="row-list"></ul>
+      <button id="clear-history-btn" class="btn btn-danger">BORRAR HISTORIAL</button>
+    </section>
+  </main>
+
+  <!-- Screamer -->
+  <div id="screamer" class="screamer" hidden>
+    <canvas id="screamer-face" class="screamer-face"></canvas>
+  </div>
+
+  <!-- Pantalla del perdedor -->
+  <div id="result" class="result" hidden role="dialog" aria-labelledby="result-name">
+    <p class="result-label">LA VÍCTIMA ES...</p>
+    <p id="result-name" class="result-name"></p>
+    <p id="result-taunt" class="result-taunt"></p>
+    <button id="result-close" class="btn">ACEPTO MI DESTINO</button>
+  </div>
+</body>
+</html>
