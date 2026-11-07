@@ -142,6 +142,7 @@ function setSpinning(value) {
 async function handleSpin() {
   if (state.spinning || state.participants.length < MIN_PARTICIPANTS) return;
   setSpinning(true);
+  sound.unlockAudio(); // en iPhone el audio se puede "dormir" (ej: al bloquear la pantalla); el toque lo despierta
   sound.playClick();
   const names = [...state.participants];
   const loser = names[await spinWheel(el.wheel, names)];
@@ -226,7 +227,7 @@ function clearHistory() {
 
 async function showScreamer() {
   el.screamer.hidden = false;
-  sound.playScream();
+  sound.playScream(SCREAMER_DURATION / 1000); // la Web Audio API usa segundos
   await wait(SCREAMER_DURATION);
   el.screamer.hidden = true;
 }

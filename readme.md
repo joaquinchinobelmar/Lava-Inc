@@ -10,7 +10,8 @@ Proyecto de práctica para la DurHack 2026.
 - **Intro animada** de LAVA-INC con una esponja pixel art (unos 4 s). Se toca la pantalla para empezar, porque los celulares no dejan sonar audio sin un toque.
 - **Ruleta** con desaceleración, ampolletas y "tic" en cada gajo.
 - Vienen 8 jugadores por defecto: Cristóbal, Chino, Mauricio, Denis, Paul, Mikey, Jeff y Tristán. Se pueden agregar y quitar (mínimo 2, máximo 12).
-- **Screamer** al elegir al perdedor (⚠️ suena fuerte; hay botón 🔊/🔇 para silenciar).
+- **Screamer** al elegir al perdedor: la cara de una niña poseída en pixel art con un grito distorsionado (⚠️ suena MUY fuerte; hay botón 🔊/🔇 para silenciar).
+- Suena también en iPhone aunque el botón lateral de silencio esté activado.
 - Pantalla dramática con el nombre del perdedor, una frase de burla, un "¡NOOO!" y un trombón triste.
 - **Historial**: marcador de derrotas ("Salón de la vergüenza") y últimos 10 sorteos con fecha.
 - Todo se guarda en `localStorage` (si falla, la app igual funciona).
